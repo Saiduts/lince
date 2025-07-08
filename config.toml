@@ -1,0 +1,24 @@
+[device]
+name = "Gateway 1"
+location = "Sala 203"
+
+[sensor]
+type = "DHT22"
+pin = 4
+unit = "Celsius"
+
+[actuator]
+type = "LED"
+pin = 17
+
+[communicator]
+type = "MQTT"
+broker_url = "mqtt://localhost:1883"
+topic = "smartcampus/ambiente"
+
+[storage]
+type = "csv"
+path = "data/lecturas.csv"
+
+[runtime]
+interval_ms = 5000  # tiempo entre ciclos de lectura
