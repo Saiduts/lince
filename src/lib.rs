@@ -35,8 +35,25 @@ pub mod network;
 // Soporte específico para la plataforma objetivo (Raspberry Pi, Jetson, etc.)
 pub mod platform;
 
+//Simulador de sensor
+pub mod simulated_sensor;
+
+
 // Reexportar interfaces clave si se desea una API unificada
 pub use core::FrameworkCore;
 pub use config::AppConfig;
 pub use drivers::SensorDriver;
 pub use network::CommClient;
+
+
+//Funciones públicas que acceden a SimulatedSensor desde el exterior
+use simulated_sensor::SimulatedSensor;
+
+pub fn get_fake_data() -> (f32, f32, u64) {
+    let sensor = SimulatedSensor::new();
+    (
+        sensor.read_temperature(),
+        sensor.read_humidity(),
+        sensor.read_timestamp(),
+    )
+}
