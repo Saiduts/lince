@@ -1,14 +1,23 @@
-
+/// Representa un sensor en el sistema (temperatura, humedad, presión, etc.).
+///
+/// Un sensor puede ser leído para obtener un valor físico o lógico.
+///
+/// # Associated Types
+/// - `Output`: Tipo de datos que produce el sensor.
 pub trait Sensor {
-    //Output es el tipo de dato que se obtiene al leer el sensor
+    /// Tipo de dato devuelto al leer el sensor.
     type Output;
-    //lee el sensor y devuelve un valor de tipo Output y un mensaje de error si ocurre algún problema
+
+    /// Lee el valor del sensor.
+    ///
+    /// # Errores
+    /// - `ReadError` si ocurre un fallo en la lectura.
     fn read(&mut self) -> Result<Self::Output, SensorError>;
 }
 
-//Error de lectura del sensor
+/// Posibles errores de lectura de un sensor.
 #[derive(Debug)]
 pub enum SensorError {
-    //Error de lectura del sensor
+    /// Fallo en la lectura.
     ReadError(String),
 }

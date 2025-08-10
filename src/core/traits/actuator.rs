@@ -1,13 +1,26 @@
+/// Representa un actuador en el sistema (motor, relé, LED, etc.).
+/// 
+/// Un actuador recibe **comandos** y los ejecuta para realizar una acción física.
+/// 
+/// # Asociated Types
+/// - `Command`: Tipo de datos que describe la instrucción enviada al actuador.
+/// 
+/// # Ejemplo
+/// Un actuador de tipo `LED` podría recibir un `bool` como comando (`true` = encender, `false` = apagar).
 pub trait Actuator {
-    //Command es el tipo de dato que se envía al actuador
+    /// Tipo del comando que el actuador acepta.
     type Command;
-    //execute es el método que se ejecuta para enviar un comando al actuador
+
+    /// Envía un comando al actuador y ejecuta la acción física.
+    ///
+    /// # Errores
+    /// Devuelve `ActuatorError::ExecuteError` si el comando falla.
     fn execute(&mut self, command: Self::Command) -> Result<(), ActuatorError>;
 }
 
-//Error de ejecución del comando
+/// Posibles errores que pueden ocurrir al operar un actuador.
 #[derive(Debug)]
 pub enum ActuatorError {
-    //Error de ejecución del comando
+    /// Error al ejecutar el comando en el actuador.
     ExecuteError(String),
 }
