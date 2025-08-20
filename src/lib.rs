@@ -27,7 +27,14 @@ pub mod config;
 pub mod core;
 
 // Drivers para sensores y actuadores (GPIO, I2C, SPI, etc.)
-pub mod drivers;
+pub mod devices{
+    pub mod sensors{
+        pub mod simulated_sensor;
+    }
+    pub mod actuators{
+        pub mod dummy;
+    }
+}
 
 // Comunicación de red (MQTT, AMQP, HTTP, WebSockets, etc.)
 pub mod network;
@@ -44,7 +51,7 @@ pub use core::traits::{
     storage::Storage,
 };
 pub use config::config::Config;
-pub use drivers::simulated_sensor::SimulatedSensor;
+pub use devices::sensors::simulated_sensor::SimulatedSensor;
 pub use network::console::ConsoleCommunicator;
 pub use network::mqtt::MqttCommunicator;
 

@@ -23,24 +23,63 @@
 //     }
 // }
 
-use iot_framework::core::traits::communicator::{self, Communicator};
-use iot_framework::core::traits::sensor;
-use iot_framework::network::console::ConsoleCommunicator;
-use iot_framework::network::mqtt::MqttCommunicator;
-use iot_framework::SimulatedSensor;
+// use iot_framework::core::traits::communicator::{self, Communicator};
+// use iot_framework::core::traits::sensor;
+// use iot_framework::network::console::ConsoleCommunicator;
+// use iot_framework::network::mqtt::MqttCommunicator;
+// use iot_framework::SimulatedSensor;
 
-fn main() {
+// fn main() {
     
-    let sensor = SimulatedSensor::new();
-    let mut communicator = ConsoleCommunicator;
+//     let sensor = SimulatedSensor::new();
+//     let mut communicator = ConsoleCommunicator;
 
-    let temp = sensor.read_temperature();
-    let hum = sensor.read_humidity();
-    let timestamp = sensor.read_timestamp();
+//     let temp = sensor.read_temperature();
+//     let hum = sensor.read_humidity();
+//     let timestamp = sensor.read_timestamp();
 
-    let mensaje = format!("Temperatura: {}°C, Humedad: {}%, Fecha: {}", temp, hum, timestamp);
+//     let mensaje = format!("Temperatura: {}°C, Humedad: {}%, Fecha: {}", temp, hum, timestamp);
 
-    if let Err(e) = communicator.send(mensaje) {
-        eprintln!("Error sending message: {:?}", e);
-    }
+//     if let Err(e) = communicator.send(mensaje) {
+//         eprintln!("Error sending message: {:?}", e);
+//     }
+// }
+
+// src/main.rs
+
+mod config;
+mod core;
+mod devices;
+mod network;
+mod platform;
+
+use std::error::Error;
+use core::runtime::RuntimeController;
+use std::vec;
+use devices::sensors::simulated_sensor::SimulatedSensor;
+use network::console::ConsoleCommunicator;
+use devices::actuators::dummy::DummyActuator;
+
+#[tokio::main] // Necesario para usar Tokio
+async fn main() -> Result<(), Box<dyn Error>> {
+    println!("Iniciando Framework IoT...");
+    
+    let sensor =  SimulatedSensor::new();
+
+    let actuator = DummyActuator::new();
+
+    let communicator = ConsoleCommunicator::new();
+
+    let mut runtime = RuntimeController::new(
+        vec![sensor],
+        vec![actuator],
+        communicator,
+        5 // intervalo en segundos
+    );
+
+    println!("Runtime configurado. Iniciando ciclo de ejecución...");
+    
+
+    runtime.run().await;
+    Ok(())
 }
