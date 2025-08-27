@@ -66,3 +66,8 @@ pub fn get_fake_data() -> (f32, f32, u64) {
         sensor.read_timestamp(),
     )
 }
+
+pub mod drivers {
+    pub mod dht;
+    // ... otros drivers
+}

@@ -3,9 +3,20 @@ name = "Gateway 1"
 location = "Sala 203"
 
 [sensor]
-type = "DHT22"
-pin = 4
-unit = "Celsius"
+id    = "lab_temp"
+kind  = "dht"
+pin   = 4            # GPIO4 (BCM)
+model = "DHT22"      
+metric = "temperature"  # "temperature" | "humidity"
+unit  = "Celsius"
+
+[[sensors]]
+id    = "lab_hum"
+kind  = "dht"
+pin   = 4
+model = "DHT11"
+metric = "humidity"
+unit  = "%"
 
 [actuator]
 type = "LED"
@@ -22,3 +33,4 @@ path = "data/lecturas.csv"
 
 [runtime]
 interval_ms = 5000  # tiempo entre ciclos de lectura
+# interval_ms = 2500   # >= 2100 ms recomendado para DHT22/DHT11
