@@ -1,78 +1,158 @@
-use std::time::{SystemTime, UNIX_EPOCH};
-use dht_embedded::{Dht11, Dht22, DhtSensor as _ , NoopInterruptControl};
-use gpio_cdev::{Chip, LineRequestFlags};
-use linux_embedded_hal::{CdevPin, Delay};
+use crate::core::SensorError;
+use crate::drivers::pin::PinDriver;
+use embedded_hal::digital::v2::{InputPin, OutputPin};
+use std::time::{Duration, Instant};
+use std::thread;
 
-use crate::core::sensor::Sensor;
-use crate::core::types::{Measurement, SensorError};
-
-/// Métrica a leer del DHT.
-#[derive(Debug, Clone)]
-pub enum DhtMetric { Temperature, Humidity }
-
-/// Driver DHT11/DHT22 (un sensor lógico = una métrica: temp o hum)
-pub struct DhtSensor {
-    id: String,
-    pin: u32,           // número de línea en gpiochip (BCM)
-    model: String,      // "DHT11" | "DHT22"
-    metric: DhtMetric,  // qué vamos a devolver: temp o hum
-    unit: String,       // "Celsius" | "%"
+/// DhtBase: base para sensores DHT11/DHT22.
+///
+/// Esta estructura maneja la comunicación de bajo nivel con un sensor DHT
+/// usando un pin digital GPIO. Proporciona métodos para iniciar la secuencia,
+/// leer bits y validar la información recibida.
+pub struct DhtBase {
+    /// Driver GPIO asociado al pin donde está conectado el sensor.
+    pin: PinDriver,
 }
 
-impl DhtSensor {
-    pub fn new(
-        id: impl Into<String>,
-        pin: u32,
-        model: impl Into<String>,
-        metric: DhtMetric,
-        unit: impl Into<String>,
-    ) -> Self {
-        Self { id: id.into(), pin, model: model.into(), metric, unit: unit.into() }
-    }
-
-    fn read_raw(&self) -> Result<(f32, f32), SensorError> {
-        // Abre gpiochip0 y solicita la línea como IN/OUT (requerido por dht)
-        let mut gpiochip = Chip::new("/dev/gpiochip0")
-            .map_err(|e| SensorError::ReadFailed(format!("gpiochip: {e}")))?;
-        let line = gpiochip.get_line(self.pin)
-            .map_err(|e| SensorError::ReadFailed(format!("get_line {}: {e}", self.pin)))?;
-        let handle = line.request(
-            LineRequestFlags::INPUT | LineRequestFlags::OUTPUT,
-            1,
-            "dht-sensor",
-        ).map_err(|e| SensorError::ReadFailed(format!("request line: {e}")))?;
-        let pin = CdevPin::new(handle)
-            .map_err(|e| SensorError::ReadFailed(format!("CdevPin: {e}")))?;
-
-        // Selecciona driver según modelo y lee
-        let reading = match self.model.as_str() {
-            "DHT22" => Dht22::new(NoopInterruptControl, Delay, pin).read(),
-            "DHT11" => Dht11::new(NoopInterruptControl, Delay, pin).read(),
-            other => return Err(SensorError::InvalidConfig(format!("Modelo no soportado: {other}"))),
-        }.map_err(|e| SensorError::ReadFailed(format!("DHT read: {e}")))?;
-
-        Ok((reading.temperature(), reading.humidity()))
-    }
-}
-
-impl Sensor for DhtSensor {
-    fn id(&self) -> &str { &self.id }
-    fn kind(&self) -> &str { "dht" }
-    fn unit(&self) -> &str { &self.unit }
-
-    fn read(&self) -> Result<Measurement, SensorError> {
-        let (t, h) = self.read_raw()?;
-        let (value, kind, unit) = match self.metric {
-            DhtMetric::Temperature => (t as f64, "temperature", self.unit.clone()),
-            DhtMetric::Humidity    => (h as f64, "humidity", self.unit.clone()),
-        };
-        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-        Ok(Measurement {
-            sensor_id: self.id.clone(),
-            kind: kind.into(),
-            value,
-            unit,
-            timestamp_secs: ts,
+impl DhtBase {
+    /// Crea una nueva instancia del sensor DHT en el pin BCM indicado.
+    ///
+    /// # Parámetros
+    /// - `pin_number`: número del pin BCM donde está conectado el sensor.
+    ///
+    /// # Retorno
+    /// - `Ok(Self)`: instancia inicializada correctamente.
+    /// - `Err(SensorError)`: error al inicializar el GPIO.
+    pub fn new(pin_number: u8) -> Result<Self, SensorError> {
+        Ok(Self {
+            pin: PinDriver::new(pin_number)?,
         })
+    }
+
+    /// Inicia la secuencia de comunicación con el sensor.
+    ///
+    /// Esta secuencia consiste en:
+    /// 1. Pull LOW del pin por 20 ms para indicar inicio al sensor.
+    /// 2. Pull HIGH por 30 µs.
+    /// 3. Cambio del pin a modo entrada para escuchar la respuesta del sensor.
+    ///
+    /// # Retorno
+    /// - `Ok(())`: secuencia iniciada correctamente.
+    /// - `Err(SensorError)`: error en el manejo del pin.
+    pub fn iniciar_secuencia(&mut self) -> Result<(), SensorError> {
+        // === Señal de inicio ===
+        let _ = self.pin.set_low();
+        thread::sleep(Duration::from_millis(20));
+        let _ = self.pin.set_high();
+        spin_sleep::sleep(Duration::from_micros(30));
+
+        // === Cambiar a modo entrada para escuchar respuesta ===
+        // (tu driver debe tener este método)
+        self.pin.set_mode(rppal::gpio::Mode::Input);
+
+        Ok(())
+    }
+
+    /// Espera hasta que el pin alcance el nivel lógico deseado o se agote el timeout.
+    ///
+    /// # Parámetros
+    /// - `pin`: referencia al pin GPIO.
+    /// - `nivel`: `true` para HIGH, `false` para LOW.
+    /// - `timeout_us`: tiempo máximo de espera en microsegundos.
+    ///
+    /// # Retorno
+    /// - `true` si el nivel fue alcanzado antes del timeout.
+    /// - `false` si ocurrió timeout o error de lectura.
+    pub fn esperar_nivel(pin: &PinDriver, nivel: bool, timeout_us: u64) -> bool {
+        let start = Instant::now();
+        let timeout = Duration::from_micros(timeout_us);
+
+        loop {
+            match pin.is_high() {
+                Ok(state) => {
+                    if state == nivel {
+                        return true;
+                    }
+                }
+                Err(_) => return false,
+            }
+
+            if start.elapsed() > timeout {
+                return false;
+            }
+
+            spin_sleep::sleep(Duration::from_micros(1));
+        }
+    }
+
+    /// Lee los 40 bits de datos enviados por el sensor.
+    ///
+    /// La comunicación DHT consiste en 5 bytes (40 bits):
+    /// - byte 0: humedad entera
+    /// - byte 1: humedad decimal
+    /// - byte 2: temperatura entera
+    /// - byte 3: temperatura decimal
+    /// - byte 4: checksum
+    ///
+    /// # Retorno
+    /// - `Ok([u8;5])`: datos recibidos correctamente.
+    /// - `Err(SensorError)`: timeout u error en la lectura.
+    pub fn leer_bits(&mut self) -> Result<[u8; 5], SensorError> {
+        let mut data = [0u8; 5];
+
+        // === Secuencia inicial de sincronización ===
+        if !Self::esperar_nivel(&self.pin, false, 100) {
+            return Err(SensorError::Timeout);
+        }
+        if !Self::esperar_nivel(&self.pin, true, 100) {
+            return Err(SensorError::Timeout);
+        }
+        if !Self::esperar_nivel(&self.pin, false, 100) {
+            return Err(SensorError::Timeout);
+        }
+
+        // === Leer los 40 bits ===
+        for byte_idx in 0..5 {
+            for bit_idx in 0..8 {
+                // Esperar pulso alto
+                if !Self::esperar_nivel(&self.pin, true, 100) {
+                    return Err(SensorError::Timeout);
+                }
+
+                // Medir duración del pulso
+                let start = Instant::now();
+                if !Self::esperar_nivel(&self.pin, false, 100) {
+                    return Err(SensorError::Timeout);
+                }
+
+                let dur = start.elapsed();
+                // Pulso >40µs = 1, <40µs = 0
+                if dur.as_micros() > 40 {
+                    data[byte_idx] |= 1 << (7 - bit_idx);
+                }
+            }
+        }
+
+        Ok(data)
+    }
+
+    /// Valida el checksum de los datos leídos.
+    ///
+    /// # Parámetros
+    /// - `data`: array de 5 bytes del sensor.
+    ///
+    /// # Retorno
+    /// - `Ok(())` si el checksum es correcto.
+    /// - `Err(SensorError::InvalidData)` si hay inconsistencia.
+    pub fn validar_checksum(data: &[u8; 5]) -> Result<(), SensorError> {
+        let checksum = data[0]
+            .wrapping_add(data[1])
+            .wrapping_add(data[2])
+            .wrapping_add(data[3]);
+        if checksum != data[4] {
+            Err(SensorError::InvalidData)
+        } else {
+            Ok(())
+        }
     }
 }

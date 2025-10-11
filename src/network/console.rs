@@ -1,48 +1,37 @@
 use crate::core::traits::communicator::{Communicator, CommunicatorError};
-use crate::devices::sensors::simulated_sensor::SensorData;
 
-/// `ConsoleCommunicator` es un comunicador simple que envía datos a la salida estándar (consola).
+/// ConsoleCommunicator: comunica datos enviándolos a la **salida estándar (consola)**.
 ///
-/// Este componente implementa el trait [`Communicator`] y se utiliza principalmente
-/// para depuración o ejecución local, permitiendo visualizar los datos que serían enviados
-/// a un sistema de comunicación real.
+/// Este comunicador es útil principalmente para:
+/// - Depuración de sensores o datos de IoT.
+/// - Pruebas locales sin necesidad de conectividad de red.
 ///
+/// Todos los datos se muestran como texto en la consola, precedidos por `[CONSOLE]`.
 pub struct ConsoleCommunicator;
 
-impl Communicator for ConsoleCommunicator {
-    /// El tipo de datos que se enviará al comunicador.
-    type Command = SensorData;
-    /// El tipo de datos que se recibirá como respuesta.
-    type Response = ();
-
-    /// Envía un comando a la consola imprimiéndolo con un prefijo identificador.
+impl ConsoleCommunicator {
+    /// Crea un nuevo `ConsoleCommunicator`.
     ///
-    /// # Parámetros
-    /// - `command`: Cadena de texto a enviar/imprimir.
-    ///
-    /// # Retorna
-    /// - `Ok(())` si el mensaje fue impreso correctamente.
-    /// - [`CommunicatorError`] en caso de error (no se esperan errores en implementación local).
-    ///
-    /// # Ejemplo
-    /// ```
-    /// let mut console_comm = ConsoleCommunicator;
-    /// console_comm.send("Temperatura: 25°C".to_string()).unwrap();
-    /// ```
-    /// Envía datos del sensor a la consola con formato legible.
-    fn send(&mut self, command: Self::Command) -> Result<Self::Response, CommunicatorError> {
-        println!("[CONSOLE] 🌡️  Temp: {:.2}°C | 💧 Humedad: {:.2}% | ⏰ Timestamp: {}", 
-                 command.temperature, command.humidity, command.timestamp);
-        Ok(())
-    }
-
-    fn receive(&mut self) -> Result<Self::Response, CommunicatorError> {
-        unimplemented!()
+    /// # Retorno
+    /// Una instancia lista para enviar datos a la consola.
+    pub fn new() -> Self {
+        Self
     }
 }
 
-impl ConsoleCommunicator {
-    pub fn new() -> Self {
-        Self
+impl Communicator for ConsoleCommunicator {
+    /// Envía datos a la consola.
+    ///
+    /// # Parámetros
+    /// - `data`: slice de bytes a mostrar. Se interpreta como UTF-8.
+    ///
+    /// # Retorno
+    /// - `Ok(())` siempre que la conversión a UTF-8 sea exitosa.
+    /// - `Err(CommunicatorError)` no se produce en esta implementación, 
+    ///   pero se mantiene la firma del trait para compatibilidad.
+    fn send(&mut self, data: &[u8]) -> Result<(), CommunicatorError> {
+        let s = String::from_utf8_lossy(data);
+        println!("[CONSOLE] {}", s);
+        Ok(())
     }
 }

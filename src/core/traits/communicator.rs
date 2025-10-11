@@ -1,37 +1,28 @@
-/// Define un medio de comunicación (ej. consola, MQTT, HTTP).
+/// Trait que define un medio de comunicación dentro del framework IoT.
+/// 
+/// Su propósito es **abstraer la forma en que los datos se envían hacia un destino externo**,
+/// como un broker MQTT, un servidor HTTP o simplemente la consola.
 ///
-/// Un comunicador envía y recibe mensajes de otros sistemas o de la nube.
+/// Cualquier estructura que implemente este trait podrá actuar como un canal de salida
+/// de información desde el gateway hacia otros sistemas.
 ///
-/// # Associated Types
-/// - `Command`: Tipo de datos enviados.
-/// - `Response`: Tipo de datos recibidos.
+
 pub trait Communicator {
-    /// Tipo del comando que se envía.
-    type Command;
-
-    /// Tipo de la respuesta que se recibe.
-    type Response;
-
-    /// Envía un comando y devuelve una respuesta.
+    /// Envía un mensaje a través del medio de comunicación.
     ///
-    /// # Errores
-    /// - `SendError` si falla el envío.
-    /// - `ExecuteError` si hay fallo interno en la ejecución.
-    fn send(&mut self, command: Self::Command) -> Result<Self::Response, CommunicatorError>;
-
-    /// Recibe datos del canal de comunicación.
+    /// El parámetro `data` representa la información a transmitir, 
+    /// que puede ser texto, JSON o bytes sin formato.
     ///
-    /// # Errores
-    /// - `ExecuteError` si hay fallo en la lectura.
-    fn receive(&mut self) -> Result<Self::Response, CommunicatorError>;
+    /// Retorna `Ok(())` si el envío fue exitoso o un `CommunicatorError` en caso de fallo.
+    fn send(&mut self, data: &[u8]) -> Result<(), CommunicatorError>;
 }
 
-/// Errores posibles de un comunicador.
-#[derive(Debug)]
+/// Enumeración que representa los errores posibles al usar un comunicador.
+///
+/// Permite manejar fallos de transmisión sin acoplarse a una implementación específica.
+/// En el futuro se pueden agregar variantes adicionales como `ConnectionLost` o `Timeout`.
+#[derive(Debug, Clone)]
 pub enum CommunicatorError {
-    /// Fallo en el envío de datos.
-    SendError(String),
-
-    /// Fallo en la ejecución interna del comunicador.
-    ExecuteError(String),
+    /// Error genérico al intentar enviar datos.
+    SendError,
 }

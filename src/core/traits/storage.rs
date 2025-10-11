@@ -1,30 +1,21 @@
-/// Define un sistema de almacenamiento (archivo local, base de datos, memoria, etc.).
-///
-/// # Associated Types
-/// - `Data`: Tipo de datos que se guardan/cargan.
+use crate::core::types::{SensorOutput};
+
+/// Define un almacenamiento simple para lecturas de sensores.
 pub trait Storage {
-    /// Tipo de los datos manejados por el almacenamiento.
-    type Data;
+    /// Guarda una nueva lectura en el almacenamiento.
+    fn save(&mut self, data: SensorOutput) -> Result<(), StorageError>;
 
-    /// Carga datos desde el almacenamiento.
-    ///
-    /// # Errores
-    /// - `LoadError` si no se puede leer.
-    fn load(&mut self) -> Result<Self::Data, StorageError>;
+    /// Devuelve todas las lecturas guardadas.
+    fn list(&self) -> Result<Vec<SensorOutput>, StorageError>;
 
-    /// Guarda datos en el almacenamiento.
-    ///
-    /// # Errores
-    /// - `SaveError` si no se puede guardar.
-    fn save(&mut self, data: Self::Data) -> Result<(), StorageError>;
+    /// Limpia el almacenamiento (borra todos los datos).
+    fn clear(&mut self) -> Result<(), StorageError>;
 }
 
-/// Posibles errores del almacenamiento.
-#[derive(Debug)]
+/// Errores básicos de almacenamiento.
+#[derive(Debug, Clone)]
 pub enum StorageError {
-    /// Error al cargar datos.
-    LoadError(String),
-
-    /// Error al guardar datos.
-    SaveError(String),
+    SaveError,
+    ReadError,
+    ClearError,
 }

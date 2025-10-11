@@ -1,22 +1,39 @@
 [package]
 name = "iot_framework"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
+# --------- LIBRARY ---------
+[lib]
+name = "iot_framework"
+path = "src/lib.rs"
+
+# --------- BINARIO (ejecutable principal) ---------
+[[bin]]
+name = "iot_framework"
+path = "src/main.rs"
+
+# --------- DEPENDENCIAS GLOBALES ---------
 [dependencies]
+# Configuración y serialización
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 toml = "0.8"
+spin_sleep = "1.1" 
+
+# Hardware y sensores
+rppal = "0.14"
+embedded-hal = "0.2.7"
+
+# Comunicación y concurrencia
 rumqttc = "0.23"
-# Simulated sensor
-rand = "0.8"
 tokio = { version = "1.47.1", features = ["full"] }
 
-# Para DHT11/DHT22 multiplataforma
-dht-embedded = "0.4"
+# Utilidades
+rand = "0.8"
+thiserror = "1.0"
+
+# --------- DEPENDENCIAS ESPECÍFICAS PARA LINUX ---------
+[target.'cfg(target_os = "linux")'.dependencies]
 gpio-cdev = "0.5"
 linux-embedded-hal = "0.3"
-
-# Errores y (si ya lo usas) serde/toml
-thiserror = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-toml = "0.8"
