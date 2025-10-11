@@ -8,7 +8,7 @@ Está diseñado para ser **modular, ligero y flexible**, facilitando la integrac
 - Sensores y actuadores.
 - Almacenamiento temporal o persistente.
 - Comunicaciones MQTT y consola.
-- Drivers hardware (GPIO, I2C, SPI).
+- Drivers hardware (GPIO).
 
 Es ideal para proyectos educativos, prototipos o soluciones IoT de bajo recurso.
 
@@ -36,7 +36,7 @@ Es ideal para proyectos educativos, prototipos o soluciones IoT de bajo recurso.
 ## Almacenamiento disponible
 
 - `MemoryStorage` (en RAM)
-- Futuras implementaciones podrían incluir almacenamiento en archivos o bases de datos
+- Futuras implementaciones podrían incluir almacenamiento en archivos
 
 ---
 
