@@ -1,0 +1,5 @@
+[book]
+authors = ["Santiago Meneses, Alvaro Mejia "]
+language = "es"
+src = "src"
+title = "Documentación de Framework para IoT Lince"

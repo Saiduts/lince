@@ -2,12 +2,12 @@ use rppal::gpio::{Gpio, IoPin, Mode, Level};
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 use crate::core::SensorError;
 
-/// PinDriver: driver mínimo y seguro para controlar un pin digital.
+/// GpioDriver: driver mínimo y seguro para controlar un pin digital.
 ///
 /// Este driver proporciona una **interfaz segura y consistente** para trabajar con pines digitales,
 /// compatible con `rppal` y con los traits de `embedded-hal` (`InputPin` y `OutputPin`).
 /// Se encarga de la inicialización del pin, lectura, escritura y cambio de modo.
-pub struct PinDriver {
+pub struct GpioDriver {
     /// Pin gestionado por RPPAL.
     pub pin: IoPin,
 
@@ -15,8 +15,8 @@ pub struct PinDriver {
     pub pin_number: u8,
 }
 
-impl PinDriver {
-    /// Crea un nuevo `PinDriver` para un pin BCM específico.
+impl GpioDriver {
+    /// Crea un nuevo `GpioDriver` para un pin BCM específico.
     ///
     /// # Parámetros
     /// - `pin_number`: número del pin BCM donde se conectará el dispositivo.
@@ -69,7 +69,7 @@ impl PinDriver {
 // Implementación de traits de `embedded-hal`
 // --------------------------------------------------------------------
 
-impl InputPin for PinDriver {
+impl InputPin for GpioDriver {
     type Error = core::convert::Infallible;
 
     /// Retorna true si el pin está en alto.
@@ -83,7 +83,7 @@ impl InputPin for PinDriver {
     }
 }
 
-impl OutputPin for PinDriver {
+impl OutputPin for GpioDriver {
     type Error = core::convert::Infallible;
 
     /// Configura el pin en alto.

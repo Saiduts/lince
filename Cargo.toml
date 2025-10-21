@@ -1,16 +1,16 @@
 [package]
-name = "iot_framework"
+name = "lince"
 version = "0.1.0"
 edition = "2021"
 
 # --------- LIBRARY ---------
 [lib]
-name = "iot_framework"
+name = "lince"
 path = "src/lib.rs"
 
 # --------- BINARIO (ejecutable principal) ---------
 [[bin]]
-name = "iot_framework"
+name = "lince"
 path = "src/main.rs"
 
 # --------- DEPENDENCIAS GLOBALES ---------

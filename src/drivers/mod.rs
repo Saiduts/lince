@@ -1,2 +1,1 @@
-pub mod pin;
-pub mod dht;
+pub mod gpio;

@@ -1,5 +1,5 @@
 use crate::core::traits::sensor::Sensor;
-use crate::drivers::pin::PinDriver;
+use crate::drivers::gpio::GpioDriver;
 use crate::core::SensorError;
 use crate::core::SensorOutput;
 
@@ -10,7 +10,7 @@ use crate::core::SensorOutput;
 /// lo que significa que el pin DO está en LOW cuando se detecta agua.
 pub struct MhRdSensor {
     /// Controlador GPIO asociado al pin del sensor.
-    gpio: PinDriver,
+    gpio: GpioDriver,
     
     /// Indica si la salida digital es activa en LOW (`true`) o HIGH (`false`).
     /// Por defecto, muchos módulos digitales son `active_low = true`.
@@ -29,7 +29,7 @@ impl MhRdSensor {
     /// - `Err(SensorError)`: error al inicializar el pin GPIO.
     pub fn new(pin: u8, active_low: bool) -> Result<Self, SensorError> {
         // Inicializa el driver GPIO; mapea errores a SensorError::IoError
-        let gpio = PinDriver::new(pin).map_err(|_| SensorError::IoError)?;
+        let gpio = GpioDriver::new(pin).map_err(|_| SensorError::IoError)?;
         Ok(Self { gpio, active_low })
     }
 }

@@ -1,6 +1,6 @@
 use crate::core::{SensorError, SensorOutput};
 use crate::core::traits::sensor::Sensor;
-use crate::drivers::dht::DhtBase;
+use crate::devices::sensors::dht::DhtBase;
 
 /// Implementación del **sensor DHT22** para el framework IoT.
 ///
@@ -18,7 +18,7 @@ use crate::drivers::dht::DhtBase;
 ///
 /// # Ejemplo
 /// ```
-/// use iot_framework::devices::sensors::dht22::Dht22Sensor;
+/// use lince::devices::sensors::dht22::Dht22Sensor;
 ///
 /// let mut sensor = Dht22Sensor::new(4).unwrap(); // GPIO4
 /// let lectura = sensor.read().unwrap();

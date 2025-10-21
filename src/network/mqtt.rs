@@ -39,7 +39,7 @@ impl MqttCommunicator {
 impl Communicator for MqttCommunicator {
     fn send(&mut self, data: &[u8]) -> Result<(), CommunicatorError> {
         self.client
-            .publish(&self.topic, QoS::AtLeastOnce, false, data)
+            .publish(&self.topic, QoS::AtLeastOnce, true, data)
             .map_err(|_| CommunicatorError::SendError)?;
         Ok(())
     }

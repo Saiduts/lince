@@ -18,7 +18,7 @@ use crate::core::{SensorError, SensorOutput};
 ///
 /// # Ejemplo
 /// ```
-/// use iot_framework::devices::sensors::ds18b20::Ds18b20Sensor;
+/// use lince::devices::sensors::ds18b20::Ds18b20Sensor;
 ///
 /// let mut sensor = Ds18b20Sensor::new("28-00000abcdef").unwrap();
 /// let lectura = sensor.read().unwrap();

@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 /// Representa los **datos producidos por un sensor** en el framework IoT.
 ///
 /// Este tipo enum permite manejar lecturas de sensores de distintos tipos de datos
@@ -24,7 +26,7 @@
 ///     _ => println!("Tipo de dato no esperado"),
 /// }
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum SensorOutput {
     /// Valor booleano (por ejemplo: presencia detectada o no).
     Bool(bool),

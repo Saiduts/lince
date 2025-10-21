@@ -1,5 +1,5 @@
 use crate::core::SensorError;
-use crate::drivers::pin::PinDriver;
+use crate::drivers::gpio::GpioDriver;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 use std::time::{Duration, Instant};
 use std::thread;
@@ -11,7 +11,7 @@ use std::thread;
 /// leer bits y validar la información recibida.
 pub struct DhtBase {
     /// Driver GPIO asociado al pin donde está conectado el sensor.
-    pin: PinDriver,
+    pin: GpioDriver,
 }
 
 impl DhtBase {
@@ -25,7 +25,7 @@ impl DhtBase {
     /// - `Err(SensorError)`: error al inicializar el GPIO.
     pub fn new(pin_number: u8) -> Result<Self, SensorError> {
         Ok(Self {
-            pin: PinDriver::new(pin_number)?,
+            pin: GpioDriver::new(pin_number)?,
         })
     }
 
@@ -63,7 +63,7 @@ impl DhtBase {
     /// # Retorno
     /// - `true` si el nivel fue alcanzado antes del timeout.
     /// - `false` si ocurrió timeout o error de lectura.
-    pub fn esperar_nivel(pin: &PinDriver, nivel: bool, timeout_us: u64) -> bool {
+    pub fn esperar_nivel(pin: &GpioDriver, nivel: bool, timeout_us: u64) -> bool {
         let start = Instant::now();
         let timeout = Duration::from_micros(timeout_us);
 
