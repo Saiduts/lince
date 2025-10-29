@@ -149,7 +149,7 @@ BOARD (Física)         BCM (Broadcom)
 
 ```rust
 // BCM 4 = Pin físico 7
-let sensor = Dht22Sensor::new(4)?;  // GPIO 4 (BCM)
+let sensor = Dht22Sensor::new(23)?;  // GPIO 4 (BCM)
 ```
 
 ### Modos de Pin
@@ -182,10 +182,10 @@ pin.set_pullupdown(PullUpDown::PullDown);
 Cada sensor "posee" su hardware:
 
 ```rust
-let sensor = Dht22Sensor::new(4)?;  // sensor posee GPIO 4
+let sensor = Dht22Sensor::new(23)?;  // sensor posee GPIO 4
 
 //   Error: no puedes crear otro sensor en el mismo pin
-let otro = Dht22Sensor::new(4)?;  // Falla: GPIO ya en uso
+let otro = Dht22Sensor::new(23)?;  // Falla: GPIO ya en uso
 ```
 
 ### Borrowing
@@ -197,7 +197,7 @@ fn leer_sensor(sensor: &mut Dht22Sensor) {  // Préstamo mutable
     sensor.read().ok();
 }
 
-let mut sensor = Dht22Sensor::new(4)?;
+let mut sensor = Dht22Sensor::new(23)?;
 leer_sensor(&mut sensor);  // Préstamo temporal
 // sensor aún existe aquí
 ```
@@ -205,7 +205,7 @@ leer_sensor(&mut sensor);  // Préstamo temporal
 ### Move Semantics
 
 ```rust
-let sensor = Dht22Sensor::new(4)?;
+let sensor = Dht22Sensor::new(23)?;
 
 let sensor2 = sensor;  // sensor se "mueve" a sensor2
 
@@ -376,7 +376,7 @@ fn crear_sensor(pin: u8) -> Result<Sensor, Error> {
 
 // Liberar recursos
 {
-    let sensor = Dht22Sensor::new(4)?;
+    let sensor = Dht22Sensor::new(23)?;
     sensor.read()?;
 }  // sensor se libera aquí automáticamente
 ```

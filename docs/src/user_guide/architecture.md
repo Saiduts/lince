@@ -221,4 +221,4 @@ impl Communicator for MqttCommunicator {
 
 - [Conceptos Básicos](./basic_concepts.md)
 - [Crear Sensores Personalizados](../sensors/custom_sensors.md)
-- [Core Types](../api_reference/core_types.md)
+- [Core Types](../reference/core_types.md)

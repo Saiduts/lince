@@ -102,6 +102,6 @@ async-trait = "0.1"
 
 ## Ver También
 
-- [Trait Communicator](../api_reference/traits_communicator.md)
+- [Trait Communicator](../reference/traits_communicator.md)
 - [MqttCommunicator](./mqtt.md)
-- [CommunicatorError](../api_reference/core_types.md)
+- [CommunicatorError](../reference/core_types.md)

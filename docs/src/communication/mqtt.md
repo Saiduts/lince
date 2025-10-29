@@ -123,7 +123,7 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut sensor = Dht22Sensor::new(4)
+    let mut sensor = Dht22Sensor::new(23)
         .expect("Error al inicializar DHT22");
     
     let mut mqtt = MqttCommunicator::new(
@@ -152,7 +152,7 @@ fn main() {
 }
 ```
 
-## API Reference
+## Referencia de Interfaces
 
 ### `MqttCommunicator`
 
@@ -295,4 +295,4 @@ Mosquitto (single instance):
 
 ## Ver También
 
-- [Trait Communicator](../api_reference/traits_communicator.md)
+- [Trait Communicator](../reference/traits_communicator.md)

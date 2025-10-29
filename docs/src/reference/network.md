@@ -149,7 +149,7 @@ impl Communicator for MiCommunicator {
 - [MqttCommunicator Reference](../communication/mqtt.md)
 - [Crear Communicators Personalizados](../communication/custom_communicators.md)
 
-### API
+### Interfaces
 - [Trait Communicator](./traits_communicator.md)
 - [CommunicatorError](./core_types.md)
 

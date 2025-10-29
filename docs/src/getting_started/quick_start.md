@@ -45,8 +45,8 @@ use std::time::Duration;
 fn main() {
     println!("  Iniciando sensor DHT22...");
     
-    // Crear el sensor en GPIO 4
-    let mut sensor = Dht22Sensor::new(4)
+    // Crear el sensor en GPIO 23
+    let mut sensor = Dht22Sensor::new(23)
         .expect("No se pudo inicializar el sensor");
     
     // Esperar estabilización
@@ -113,12 +113,13 @@ Para guardar los datos en memoria:
 ```rust
 use lince::devices::sensors::dht22::Dht22Sensor;
 use lince::storage::memory::MemoryStorage;
+use lince::core::traits::sensor::Sensor;
 use lince::core::traits::storage::Storage;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut sensor = Dht22Sensor::new(4).unwrap();
+    let mut sensor = Dht22Sensor::new(23).unwrap();
     let mut storage = MemoryStorage::new();
     
     for _ in 0..5 {
@@ -147,11 +148,12 @@ Para publicar en un broker MQTT:
 use lince::devices::sensors::dht22::Dht22Sensor;
 use lince::network::mqtt::MqttCommunicator;
 use lince::core::traits::communicator::Communicator;
+use lince::core::traits::sensor::Sensor;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let mut sensor = Dht22Sensor::new(4).unwrap();
+    let mut sensor = Dht22Sensor::new(23).unwrap();
     let mut mqtt = MqttCommunicator::new(
         "mi-sensor",
         "localhost",

@@ -44,5 +44,5 @@ Los apéndices proporcionan información de referencia rápida que complementa l
 Además de estos apéndices, considera consultar:
 
 - **[Guía del Usuario](../user_guide/)**: Conceptos fundamentales del framework
-- **[Referencia API](../api_reference/)**: Documentación detallada de módulos y traits
+- **[Referencia de interfaces](../reference/)**: Documentación detallada de módulos y traits
 

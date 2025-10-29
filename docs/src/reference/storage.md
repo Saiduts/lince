@@ -86,7 +86,7 @@ guardar_lecturas(&mut memory, &mut dht22, 10)?;
 - [MemoryStorage Reference](../storage/memory_storage.md)
 - [Crear Storage Personalizado](../storage/custom_storage.md)
 
-### API
+### Interfaces
 - [Trait Storage](./traits_storage.md)
 - [StorageError](./core_types.md)
 

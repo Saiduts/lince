@@ -98,7 +98,6 @@ fn main() {
 
 
 
-## API Reference
 
 ### `Dht11Sensor`
 

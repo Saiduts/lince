@@ -89,6 +89,6 @@ Al crear un sensor personalizado, verifica:
 
 ## Ver También
 
-- [Trait Sensor API](../api_reference/traits_sensor.md)
+- [Trait Sensor](../reference/traits_sensor.md)
 - [GpioDriver Reference](../drivers/gpio.md)
-- [SensorOutput y SensorError](../api_reference/core_types.md)
+- [SensorOutput y SensorError](../reference/core_types.md)

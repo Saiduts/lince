@@ -83,7 +83,7 @@ log = "0.4"
 ## Próximos Pasos
 
 -   Revisa [MemoryStorage](./memory_storage.md)
--   Explora [Trait Storage](../api_reference/storage.md)
+-   Explora [Trait Storage](../reference/storage.md)
 
 ## Ver También
 

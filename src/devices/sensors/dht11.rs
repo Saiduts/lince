@@ -15,7 +15,7 @@ use crate::devices::sensors::dht::DhtBase;
 /// ```
 /// use lince::devices::sensors::dht11::Dht11Sensor;
 ///
-/// let mut sensor = Dht11Sensor::new(4).unwrap(); // GPIO4
+/// let mut sensor = Dht11Sensor::new(17).unwrap(); // GPIO17
 /// let lectura = sensor.read().unwrap();
 /// println!("{:?}", lectura);
 /// ```

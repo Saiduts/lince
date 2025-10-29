@@ -67,7 +67,7 @@ lsof | grep gpio
 use std::thread;
 use std::time::Duration;
 
-let mut sensor = Dht22Sensor::new(4)?;
+let mut sensor = Dht22Sensor::new(23)?;
 
 //   Mal: muy rápido
 sensor.read()?;

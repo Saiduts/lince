@@ -58,7 +58,7 @@ El trait `Sensor` está implementado para:
 
 ## Ver También
 
-- [SensorOutput](../api_reference/core_types.md)
-- [SensorError](../api_reference/core_types.md)
+- [SensorOutput](../reference/core_types.md)
+- [SensorError](../reference/core_types.md)
 - [Crear Sensores Personalizados](../sensors/custom_sensors.md)
 - [GpioDriver](../drivers/gpio.md)

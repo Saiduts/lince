@@ -26,5 +26,5 @@ pub trait Storage {
 
 ## Ver También
 
-- [Trait Storage API](../api_reference/traits_storage.md)
-- [Core Types](../api_reference/core_types.md)
+- [Trait Storage](../reference/traits_storage.md)
+- [Core Types](../reference/core_types.md)

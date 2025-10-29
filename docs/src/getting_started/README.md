@@ -32,4 +32,4 @@ Esta guía permite tener un **entorno funcional** del framework en pocos pasos, 
 
 ##   Lecturas recomendadas
 - [Guía del Usuario](../user_guide/index.html)  
-- [Referencia de API](../api_reference/)
+- [Referencia de interfaces](../reference/)

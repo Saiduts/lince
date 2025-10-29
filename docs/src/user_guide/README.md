@@ -35,4 +35,4 @@ Con esta base, el desarrollador podrá extender o adaptar el framework a distint
 
 ##   Lecturas relacionadas
 - [Primeros pasos](../getting_started/index.html)  
-- [Referencia de API](../api_reference/index.html)
+- [Referencia de interfaces](../reference/index.html)

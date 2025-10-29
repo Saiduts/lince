@@ -24,7 +24,7 @@ Arquitectura basada en **traits** que permite implementar fácilmente nuevos sen
 Desarrollado en **Rust**, garantiza seguridad de memoria, eficiencia y rendimiento nativo sin *garbage collector*.
 
 ###  Fácil de Usar
-API intuitiva inspirada en frameworks como **MicroPython**, pero con la potencia, seguridad y concurrencia de Rust.
+Framework intuitivo inspirada en proyectos como **MicroPython**, pero con la potencia, seguridad y concurrencia de Rust.
 
 ###  Listo para Producción
 Incluye soporte para **MQTT**, manejo robusto de errores y una arquitectura validada en dispositivos reales como Raspberry Pi.
@@ -55,7 +55,7 @@ use lince::devices::sensors::dht22::Dht22Sensor;
 use lince::core::traits::sensor::Sensor;
 
 fn main() {
-    let mut sensor = Dht22Sensor::new(4).unwrap();
+    let mut sensor = Dht22Sensor::new(23).unwrap();
     
     match sensor.read() {
         Ok(data) => println!("Lectura: {:?}", data),

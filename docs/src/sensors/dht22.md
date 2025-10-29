@@ -43,7 +43,7 @@ use lince::core::{SensorOutput, SensorError};
 
 ```rust
 // Crear sensor en GPIO 4
-let mut sensor = Dht22Sensor::new(4)?;
+let mut sensor = Dht22Sensor::new(23)?;
 ```
 
 ### Leer Datos
@@ -67,7 +67,7 @@ use lince::devices::sensors::dht22::Dht22Sensor;
 use lince::core::traits::sensor::Sensor;
 
 fn main() {
-    let mut sensor = Dht22Sensor::new(4)
+    let mut sensor = Dht22Sensor::new(23)
         .expect("Error al inicializar DHT22");
     
     loop {
@@ -82,7 +82,6 @@ fn main() {
 ```
 
 
-## API Reference
 
 ### `Dht22Sensor`
 

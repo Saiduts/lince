@@ -115,7 +115,6 @@ fn main() {
 ```
 
 
-## API Reference
 
 ### `MhRdSensor`
 

@@ -8,7 +8,6 @@ El `GpioDriver` proporciona una abstracción segura y de alto nivel para acceder
 
 -   Simplifica el acceso a GPIO
 -   Implementa traits de `embedded-hal`
--   Proporciona API consistente
 -   Maneja errores de forma segura
 
 ## Estructura
@@ -22,7 +21,7 @@ pub struct GpioDriver {
 }
 ```
 
-## API Básica
+## GpioDriver Básico
 
 ### Constructor
 
@@ -43,7 +42,7 @@ Crea un nuevo driver para el pin especificado (numeración BCM).
 
 **Ejemplo:**
 ```rust
-use lince::drivers::pin::GpioDriver;
+use lince::drivers::gpio::GpioDriver;
 
 let mut pin = GpioDriver::new(17)?;  // GPIO 17
 ```
@@ -76,8 +75,8 @@ if pin.read_bool() {
 ### Escritura
 
 ```rust
-pub fn set_high(&mut self) -> Result<(), rppal::gpio::Error>
-pub fn set_low(&mut self) -> Result<(), rppal::gpio::Error>
+pub fn set_high(&mut self) -> Result<(), core::convert::Infallible>
+pub fn set_low(&mut self) -> Result<(), core::convert::Infallible>
 pub fn write_level(&mut self, level: Level)
 ```
 
@@ -117,74 +116,6 @@ pin.set_mode(Mode::Input);
 pin.set_mode(Mode::Output);
 ```
 
-## Uso Avanzado
-
-### Pull-up/Pull-down Resistors
-
-```rust
-use rppal::gpio::PullUpDown;
-
-// Activar pull-up (pin por defecto en HIGH)
-pin.set_pullupdown(PullUpDown::PullUp);
-
-// Activar pull-down (pin por defecto en LOW)
-pin.set_pullupdown(PullUpDown::PullDown);
-
-// Desactivar resistencias internas
-pin.set_pullupdown(PullUpDown::Off);
-```
-
-**Cuándo usar:**
-- **Pull-up**: Botones, sensores active-low
-- **Pull-down**: Sensores active-high
-- **Off**: Cuando hay resistencias externas
-
-### Interrupciones (Triggers)
-
-```rust
-use rppal::gpio::Trigger;
-
-// Configurar interrupción
-pin.set_interrupt(Trigger::RisingEdge)?;
-
-// Esperar evento (bloquea hasta que ocurra)
-pin.poll_interrupt(false, Some(Duration::from_secs(5)))?;
-```
-
-**Triggers disponibles:**
-- `RisingEdge`: LOW → HIGH
-- `FallingEdge`: HIGH → LOW
-- `Both`: Cualquier cambio
-
-### Ejemplo: Sensor Digital
-
-```rust
-struct MotionSensor {
-    pin: GpioDriver,
-}
-
-impl MotionSensor {
-    fn new(pin_number: u8) -> Result<Self, SensorError> {
-        let pin = GpioDriver::new(pin_number)?;
-        Ok(Self { pin })
-    }
-    
-    fn is_motion_detected(&self) -> bool {
-        self.pin.read_bool()
-    }
-}
-
-fn main() {
-    let sensor = MotionSensor::new(23).unwrap();
-    
-    loop {
-        if sensor.is_motion_detected() {
-            println!(" ¡Movimiento detectado!");
-        }
-        thread::sleep(Duration::from_millis(100));
-    }
-}
-```
 
 ## Compatibilidad con embedded-hal
 
@@ -194,7 +125,7 @@ fn main() {
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 
 impl InputPin for GpioDriver {
-    type Error = rppal::gpio::Error;
+    type Error = core::convert::Infallible;
     
     fn is_high(&self) -> Result<bool, Self::Error> {
         Ok(self.pin.is_high())
@@ -206,7 +137,7 @@ impl InputPin for GpioDriver {
 }
 
 impl OutputPin for GpioDriver {
-    type Error = rppal::gpio::Error;
+    type Error = core::convert::Infallible;
     
     fn set_low(&mut self) -> Result<(), Self::Error> {
         self.pin.set_low();
@@ -231,17 +162,19 @@ impl OutputPin for GpioDriver {
 ### Pines Seguros para Uso General
 
 ```
-  Seguros:
-GPIO 5, 6, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27
+Seguros:
+GPIO 5, 6, 12, 13, 16, 17, 18, 19,
+20, 21, 22, 23, 24, 25, 26, 27
 
- ️ Con precaución:
-GPIO 4  - Generalmente usado para OneWire (DS18B20)
-GPIO 14-15 - UART (serial console)
+Con precaución:
+GPIO 4  - OneWire
+GPIO 14–15 - UART
+GPIO 2–3 - I2C
+GPIO 7–11 - SPI
 
-  Evitar:
-GPIO 0-1  - Reservados para configuración
-GPIO 2-3  - I2C (si usas I2C)
-GPIO 7-11 - SPI (si usas SPI)
+Evitar:
+GPIO 0–1 - Reservados (ID EEPROM)
+
 ```
 
 ## Especificaciones Eléctricas

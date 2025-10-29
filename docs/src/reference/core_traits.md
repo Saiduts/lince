@@ -120,7 +120,7 @@ use lince::core::traits::{Sensor, Storage, Communicator};
 
 fn pipeline_completo() -> Result<(), Box<dyn std::error::Error>> {
     // Componentes
-    let mut sensor = Dht22Sensor::new(4)?;
+    let mut sensor = Dht22Sensor::new(23)?;
     let mut storage = MemoryStorage::new();
     let mut mqtt = MqttCommunicator::new("sensor", "localhost", 1883, "topic")?;
     

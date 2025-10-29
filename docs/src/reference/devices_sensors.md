@@ -60,7 +60,7 @@ impl Dht22Sensor {
 
 **Ejemplo:**
 ```rust
-let mut sensor = Dht22Sensor::new(4)?;
+let mut sensor = Dht22Sensor::new(23)?;
 let data = sensor.read()?;  // "Temp: 24.3°C, Hum: 58.2%"
 ```
 
@@ -132,7 +132,7 @@ if let SensorOutput::Text(estado) = data {
 ```rust
 let sensores: Vec<Box<dyn Sensor<Output = SensorOutput>>> = vec![
     Box::new(Dht11Sensor::new(17)?),
-    Box::new(Dht22Sensor::new(4)?),
+    Box::new(Dht22Sensor::new(23)?),
     Box::new(Ds18b20Sensor::new("28-abc")?),
     Box::new(MhRdSensor::new(27, true)?),
 ];
@@ -231,7 +231,7 @@ Total <100mA es seguro desde pines 3.3V de RPi
 #[ignore]  // Solo con hardware conectado
 fn test_all_sensors() {
     let mut dht11 = Dht11Sensor::new(17).expect("DHT11 no disponible");
-    let mut dht22 = Dht22Sensor::new(4).expect("DHT22 no disponible");
+    let mut dht22 = Dht22Sensor::new(23).expect("DHT22 no disponible");
     let mut ds = Ds18b20Sensor::new("28-abc").expect("DS18B20 no disponible");
     let mut rain = MhRdSensor::new(27, true).expect("MH-RD no disponible");
     
@@ -278,7 +278,7 @@ loop {
 ### Guías
 - [Crear Sensores Personalizados](../sensors/custom_sensors.md)
 
-### API
+### Interfaces
 - [Trait Sensor](./traits_sensor.md)
 - [SensorOutput y SensorError](./core_types.md)
 
