@@ -40,10 +40,35 @@ impl Ds18b20Sensor {
     /// # Retorna
     /// - `Ok(Self)` si la ruta se construyó correctamente.
     /// - `Err(SensorError)` solo en caso de error de inicialización futura.
-    pub fn new(device_id: &str) -> Result<Self, SensorError> {
-        Ok(Self {
-            device_path: format!("/sys/bus/w1/devices/{}/w1_slave", device_id),
-        })
+     pub fn new(device_id: &str) -> Result<Self, SensorError> {
+        let device_path = format!("/sys/bus/w1/devices/{}/w1_slave", device_id);
+        
+        // Validar que el archivo existe
+        if !std::path::Path::new(&device_path).exists() {
+            eprintln!(
+                "[DS18B20] Dispositivo no encontrado: {}. \
+                Verifica que OneWire está habilitado y el sensor conectado.",
+                device_id
+            );
+            return Err(SensorError::InitializationError);
+        }
+        
+        // Intentar lectura de prueba
+        let test_read = fs::read_to_string(&device_path)
+            .map_err(|e| {
+                eprintln!("[DS18B20] Error al leer dispositivo: {}", e);
+                SensorError::IoError
+            })?;
+            
+        // Validar formato básico
+        if !test_read.contains("t=") {
+            eprintln!("[DS18B20] Formato de datos inválido del sensor");
+            return Err(SensorError::InvalidData);
+        }
+        
+        println!("[DS18B20] Sensor {} inicializado correctamente", device_id);
+        
+        Ok(Self { device_path })
     }
 
     /// Lee directamente el archivo `w1_slave` y obtiene los datos crudos del sensor.
@@ -53,7 +78,10 @@ impl Ds18b20Sensor {
     /// - `Err(SensorError::IoError)` si el archivo no puede leerse.
     fn read_temp_raw(&self) -> Result<String, SensorError> {
         fs::read_to_string(&self.device_path)
-            .map_err(|_| SensorError::IoError)
+            .map_err(|e| {
+                eprintln!("[DS18B20] Error de lectura: {}", e);
+                SensorError::IoError
+            })
     }
 }
 
@@ -75,16 +103,46 @@ impl Sensor for Ds18b20Sensor {
     /// - `Err(SensorError::IoError)` si ocurre un problema al leer el archivo.
     fn read(&mut self) -> Result<Self::Output, SensorError> {
         let data = self.read_temp_raw()?;
+        // Verificar CRC (checksum del sensor)
+        if !data.contains("YES") {
+            eprintln!("[DS18B20] CRC inválido - datos corruptos");
+            return Err(SensorError::InvalidData);
+        }
 
         if let Some(eq_pos) = data.find("t=") {
-            let temp_str = &data[eq_pos + 2..].trim();
-
-            let temp_c = temp_str
-                .parse::<f32>()
-                .map_err(|_| SensorError::InvalidData)? / 1000.0;
+            let temp_str = data[eq_pos + 2..].trim();
+            
+            let temp_raw = temp_str
+                .parse::<i32>()
+                .map_err(|e| {
+                    eprintln!("[DS18B20] Error al parsear temperatura: {}", e);
+                    SensorError::InvalidData
+                })?;
+            
+            let temp_c = temp_raw as f32 / 1000.0;
+            
+            // Validar rango físico del DS18B20 (-55°C a 125°C)
+            if temp_c < -55.0 || temp_c > 125.0 {
+                eprintln!(
+                    "[DS18B20] Temperatura fuera de rango: {:.2}°C. \
+                    Sensor posiblemente desconectado o defectuoso.",
+                    temp_c
+                );
+                return Err(SensorError::InvalidData);
+            }
+            
+            // Detectar valores sospechosos (exactamente 0°C o 85°C suelen ser errores)
+            if temp_c == 0.0 || temp_c == 85.0 {
+                eprintln!(
+                    "[DS18B20] ADVERTENCIA: Temperatura sospechosa {:.2}°C. \
+                    Puede indicar sensor desconectado o en estado de inicialización.",
+                    temp_c
+                );
+            }
 
             Ok(SensorOutput::Text(format!("{:.2} °C", temp_c)))
         } else {
+            eprintln!("[DS18B20] No se encontró marcador 't=' en los datos");
             Err(SensorError::InvalidData)
         }
     }

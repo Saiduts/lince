@@ -1,8 +1,8 @@
-# core::traits
+# Traits
 
 Resumen de todos los traits fundamentales del framework IoT.
 
-## Módulo: `lince::core::traits`
+## Módulo
 
 ```rust
 pub mod sensor;
@@ -10,7 +10,7 @@ pub mod storage;
 pub mod communicator;
 ```
 
-El módulo `core::traits` define las abstracciones principales que permiten la extensibilidad y modularidad del framework.
+El módulo `traits` define las abstracciones principales que permiten la extensibilidad y modularidad del framework.
 
 ## Traits Disponibles
 
@@ -26,7 +26,6 @@ pub trait Sensor {
 ```
 
 **Propósito:** Abstracción unificada para cualquier sensor  
-**Ubicación:** `lince::core::traits::sensor`  
 **Documentación:** [Trait Sensor](./traits_sensor.md)
 
 **Implementaciones:**
@@ -57,7 +56,6 @@ pub trait Storage {
 ```
 
 **Propósito:** Persistencia y gestión de datos  
-**Ubicación:** `lince::core::traits::storage`  
 **Documentación:** [Trait Storage](./traits_storage.md)
 
 **Implementaciones:**
@@ -89,7 +87,6 @@ pub trait Communicator {
 ```
 
 **Propósito:** Transmisión de datos a sistemas externos  
-**Ubicación:** `lince::core::traits::communicator`  
 **Documentación:** [Trait Communicator](./traits_communicator.md)
 
 **Implementaciones:**

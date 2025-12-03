@@ -27,7 +27,6 @@ embedded-hal = "0.2.7"
 
 # Comunicación y concurrencia
 rumqttc = "0.23"
-tokio = { version = "1.47.1", features = ["full"] }
 
 # Utilidades
 rand = "0.8"

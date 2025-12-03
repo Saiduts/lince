@@ -2,7 +2,7 @@
 
 Drivers de hardware de bajo nivel para comunicación con dispositivos.
 
-## Módulo: `lince::drivers`
+## Drivers
 
 ```rust
 pub mod gpio;

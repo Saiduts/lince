@@ -2,7 +2,7 @@
 
 Implementaciones de almacenamiento de datos para el framework IoT.
 
-## Módulo: `lince::storage`
+## Storage
 
 ```rust
 pub mod memory;

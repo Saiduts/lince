@@ -10,11 +10,11 @@ Lince sigue una arquitectura modular basada en **abstracciones mediante traits**
 
 ## Componentes Principales
 
-### 1. Core (`src/core/`)
+### 1. Core 
 
 El núcleo del framework contiene las abstracciones fundamentales.
 
-#### Traits (`src/core/traits/`)
+#### Traits 
 
 Define los contratos que deben cumplir las implementaciones:
 
@@ -38,7 +38,7 @@ pub trait Communicator {
 }
 ```
 
-#### Types (`src/core/types.rs`)
+#### Types 
 
 Define los tipos de datos compartidos:
 
@@ -61,13 +61,12 @@ pub enum SensorError {
 }
 ```
 
-### 2. Devices (`src/devices/`)
+### 2. Devices 
 
 Implementaciones concretas de sensores físicos.
 
 ```
-devices/
-└── sensors/
+sensors/
     ├── dht11.rs      # Sensor DHT11
     ├── dht22.rs      # Sensor DHT22
     ├── ds18b20.rs    # Sensor DS18B20 (OneWire)
@@ -103,7 +102,7 @@ impl Sensor for Dht22Sensor {
 }
 ```
 
-### 3. Drivers (`src/drivers/`)
+### 3. Drivers 
 
 Capa de abstracción de hardware de bajo nivel.
 
@@ -112,7 +111,7 @@ drivers/
 └── gpio.rs        # Driver GPIO genérico
 ```
 
-#### GpioDriver (`gpio.rs`)
+#### GpioDriver 
 
 Proporciona acceso seguro a GPIO:
 
@@ -139,7 +138,7 @@ impl OutputPin for GpioDriver { /* ... */ }
 - Abstracción de `rppal` específico de Raspberry Pi
 
 
-### 4. Storage (`src/storage/`)
+### 4. Storage 
 
 Implementaciones de almacenamiento de datos.
 
@@ -167,7 +166,7 @@ impl Storage for MemoryStorage {
 
 **Extensible**: Puedes crear `SqliteStorage`, `FileStorage`, etc.
 
-### 5. Network (`src/network/`)
+### 5. Network 
 
 Implementaciones de comunicadores.
 

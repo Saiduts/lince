@@ -1,11 +1,11 @@
 
-# core::types
+# Types
 
 Este módulo define los tipos fundamentales que representan datos y errores en el framework IoT.
 
 ## Descripción General
 
-`core::types` proporciona las estructuras básicas para:
+`Types` proporciona las estructuras básicas para:
 - Representar lecturas de sensores de diferentes tipos
 - Manejar errores comunes en operaciones con sensores
 - Garantizar interoperabilidad entre componentes del framework

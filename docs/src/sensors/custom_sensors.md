@@ -15,12 +15,12 @@ use lince::core::traits::sensor::Sensor;
 use lince::core::{SensorOutput, SensorError};
 
 // 1. Estructura
-pub struct MiSensor {
+pub struct MySensor {
     // Estado interno
 }
 
 // 2. Constructor
-impl MiSensor {
+impl MySensor {
     pub fn new(/* parámetros */) -> Result<Self, SensorError> {
         // Inicialización
         Ok(Self { /* ... */ })

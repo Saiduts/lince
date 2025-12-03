@@ -1,8 +1,8 @@
-# Módulo devices::sensors
+# Módulo Sensores
 
 Implementaciones de sensores físicos para el framework IoT.
 
-## Módulo: `lince::devices::sensors`
+## Sensores
 
 ```rust
 pub mod dht11;

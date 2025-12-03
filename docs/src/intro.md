@@ -69,9 +69,11 @@ Este ejemplo muestra cómo inicializar y leer un sensor DHT22 conectado al pin G
 
 # Plataformas Soportadas
 
-- **Raspberry Pi** (todos los modelos con soporte GPIO)  
-- **Linux ARM** (dispositivos compatibles con `rppal`)  
-- **Otros sistemas Linux** con soporte de pines GPIO  
+> **Importante:** Este framework ha sido probado **únicamente en Raspberry Pi 4** ejecutando Raspberry Pi OS (64-bit). Aunque técnicamente es compatible con otros modelos de Raspberry Pi y dispositivos Linux con GPIO, no se garantiza su funcionamiento en plataformas no probadas.
+
+- **Raspberry Pi 4** (probado y verificado)
+- **Otros modelos de Raspberry Pi** (compatibilidad teórica, sin pruebas)
+- **Dispositivos Linux ARM** con `rppal` (sin pruebas)
 
 ---
 

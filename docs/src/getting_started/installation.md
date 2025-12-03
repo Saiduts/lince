@@ -24,14 +24,22 @@ Esta guía te ayudará a instalar y configurar el **Framework para IoT Lince** e
 
 ### Actualizar el Sistema
 
+### Actualizar el Sistema
 ```bash
+# Actualiza la lista de paquetes disponibles desde los repositorios
 sudo apt update
-sudo apt upgrade -y
+
+# Instala las versiones más recientes de los paquetes ya instalados
+sudo apt upgrade -y  # -y acepta automáticamente todas las confirmaciones
 ```
 
 ### Instalar Dependencias
 
+### Instalar Dependencias
 ```bash
+# build-essential: herramientas de compilación (gcc, g++, make)
+# git: sistema de control de versiones para clonar repositorios
+# curl: herramienta para descargar archivos desde URLs
 sudo apt install -y build-essential git curl
 ```
 

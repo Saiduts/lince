@@ -2,7 +2,7 @@
 
 Implementaciones de comunicadores para enviar datos a sistemas externos.
 
-## Módulo: `lince::network`
+## Network
 
 ```rust
 pub mod console;
