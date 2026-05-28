@@ -1,33 +1,34 @@
+// src/lib.rs
 
 //! API pública del framework IoT para dispositivos gateway.
 //!
 //! Este framework permite construir soluciones IoT modulares, ligeras y extensibles,
-//! con soporte para sensores, almacenamiento, conectividad MQTT.
+//! con soporte para sensores, almacenamiento, conectividad MQTT y reintento automático
+//! por desconexión.
 
-
-// Núcleo del framework: control de flujo, ciclo de vida, lógica principal
 pub mod core;
 
-// Sensores fisicos
-pub mod devices{
+pub mod devices {
     pub mod sensors;
 }
 
 pub mod storage;
-
-// Comunicación de red (MQTT, HTTP.)
 pub mod network;
-
-//Drivers GPIO.
 pub mod drivers;
+pub mod parser;
 
-// Reexportar interfaces clave para una API unificada
+// Traits principales
 pub use core::traits::{
     communicator::Communicator,
     sensor::Sensor,
     storage::Storage,
 };
+
+// Communicators
 pub use network::console::ConsoleCommunicator;
 pub use network::mqtt::MqttCommunicator;
 
 
+// Formato Smart Campus
+pub use network::smart_campus::{SmartCampusFormatter, SmartCampusHeader, Metric};
+pub use parser::SensorParser;

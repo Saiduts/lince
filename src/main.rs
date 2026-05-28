@@ -2,120 +2,127 @@ use std::thread;
 use std::time::Duration;
 
 use lince::devices::sensors::dht11::Dht11Sensor;
-use lince::devices::sensors::dht22::Dht22Sensor;
-use lince::storage::memory::MemoryStorage;
+use lince::devices::sensors::ds18b20::Ds18b20Sensor;
 use lince::core::traits::sensor::Sensor;
 use lince::core::traits::storage::Storage;
+use lince::core::traits::communicator::{Communicator, CommunicatorError};
+use lince::parser::SensorParser;
+use lince::network::smart_campus::{SmartCampusFormatter, SmartCampusHeader};
 use lince::network::mqtt::MqttCommunicator;
-use lince::core::traits::communicator::Communicator;
-use lince::core::SensorOutput;
+use lince::storage::sqlite::SqliteStorage;
+
+pub mod comunicacion {
+    pub const BROKER:     &str = "159.65.231.88";
+    pub const PUERTO:     u16  = 1883;
+    pub const TOPIC:      &str = "device/messages";
+    pub const CLIENT_ID:  &str = "lince";
+}
+
+pub mod sensores {
+    pub const DHT11_PIN:  u8  = 17;
+    pub const DS18B20_ID: &str = "28-00000b0e60f1";
+}
 
 fn main() {
-    println!("Iniciando lectura de sensores DHT...");
+    // --- Sensores ---
+    let mut dht11 = Dht11Sensor::new(sensores::DHT11_PIN)
+        .expect("No se pudo inicializar DHT11");
 
-    // Inicializar sensores
-    let mut dht22 = match Dht22Sensor::new(23) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("Error inicializando DHT22: {:?}", e);
-            return;
-        }
-    };
+    let mut ds18b20 = Ds18b20Sensor::new(sensores::DS18B20_ID)
+        .expect("No se pudo inicializar DS18B20");
 
-    let mut dht11 = match Dht11Sensor::new(17) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("Error inicializando DHT11: {:?}", e);
-            return;
-        }
-    };
+    // --- Formatter ---
+    let formatter = SmartCampusFormatter::new(
+        SmartCampusHeader::new(comunicacion::CLIENT_ID, comunicacion::TOPIC)
+    );
 
-    // Almacenamiento en memoria
-    let mut storage = MemoryStorage::new();
+    // --- Comunicación ---
+    let mut mqtt = MqttCommunicator::new(
+        comunicacion::CLIENT_ID,
+        comunicacion::BROKER,
+        comunicacion::PUERTO,
+        comunicacion::TOPIC,
+    ).expect("No se pudo conectar al broker MQTT");
 
-    // Comunicador MQTT
-    let mut mqtt = match MqttCommunicator::new("test_client", "localhost", 1883, "test/topic") {
-        Ok(c) => c,
-        Err(e) => {
-            eprintln!("Error creando comunicador MQTT: {:?}", e);
-            return;
-        }
-    };
+    // --- Almacenamiento ---
+    let mut storage = SqliteStorage::new("pendientes.db")
+        .expect("No se pudo abrir la base de datos");
 
-    println!("Esperando 3s para estabilización inicial...");
-    thread::sleep(Duration::from_secs(3));
+    println!("Iniciando lectura de sensores...");
+    println!("Broker: {}:{}", comunicacion::BROKER, comunicacion::PUERTO);
+    println!("Topic:  {}", comunicacion::TOPIC);
+    println!("Pendientes al arrancar: {}\n", storage.pending_count());
 
-    for i in 1..=3 {
-        println!("Iteración {}/3", i);
+    // Espera de estabilización
+    thread::sleep(Duration::from_secs(2));
 
-        // --- Leer DHT22 con reintentos ---
-        let mut attempts = 0;
-        let data_dht22 = loop {
-            match dht22.read() {
-                Ok(d) => break d,
-                Err(e) if attempts < 2 => {
-                    attempts += 1;
-                    eprintln!("Error DHT22 (intento {}): {:?}, reintentando...", attempts, e);
-                    thread::sleep(Duration::from_millis(500));
-                }
-                Err(e) => {
-                    eprintln!("Error DHT22 definitivo: {:?}", e);
-                    break SensorOutput::Text("Error DHT22".to_string());
-                }
-            }
-        };
+    loop {
+        // -------------------------------------------------------
+        // DHT11 — temperatura y humedad
+        // -------------------------------------------------------
+        match dht11.read() {
+            Ok(output) => {
+                match SensorParser::dht(&output) {
+                    Ok(valores) => {
+                        let temp = valores["temperatura"];
+                        let hum  = valores["humedad"];
+                        println!("[DHT11] Temp: {}°C  Hum: {}%", temp, hum);
 
-        println!("DHT22 => {:?}", data_dht22);
-        storage.save(data_dht22.clone()).unwrap();
+                        let json = formatter.desde_mapa(&valores);
+                        storage.save(output).unwrap();
 
-        if let SensorOutput::Text(ref s) = data_dht22 {
-            if let Err(e) = mqtt.send(s.as_bytes()) {
-                eprintln!("Error enviando DHT22 via MQTT: {:?}", e);
-            }
-        }
-
-        thread::sleep(Duration::from_secs(3));
-
-        // --- Leer DHT11 con reintentos ---
-        attempts = 0;
-        let data_dht11 = loop {
-            match dht11.read() {
-                Ok(d) => break d,
-                Err(e) if attempts < 2 => {
-                    attempts += 1;
-                    eprintln!("Error DHT11 (intento {}): {:?}, reintentando...", attempts, e);
-                    thread::sleep(Duration::from_millis(500));
-                }
-                Err(e) => {
-                    eprintln!("Error DHT11 definitivo: {:?}", e);
-                    break SensorOutput::Text("Error DHT11".to_string());
+                        match mqtt.send(json.as_bytes()) {
+                            Ok(()) => println!("[DHT11] Enviado: {}", json),
+                            Err(CommunicatorError::Disconnected) => {
+                                eprintln!("[DHT11] Sin conexión. Reintentando pendientes...");
+                                let n = storage.flush_pending(&mut mqtt);
+                                println!("[DHT11] Reenviados: {}", n);
+                            }
+                            Err(CommunicatorError::SendError) => {
+                                eprintln!("[DHT11] Error de protocolo, descartado");
+                            }
+                        }
+                    }
+                    Err(e) => eprintln!("[DHT11] Error al parsear: {:?}", e),
                 }
             }
-        };
+            Err(e) => eprintln!("[DHT11] Error al leer: {:?}", e),
+        }
 
-        println!("DHT11 => {:?}", data_dht11);
-        storage.save(data_dht11.clone()).unwrap();
+        // DHT11 necesita mínimo 1 s entre lecturas
+        thread::sleep(Duration::from_secs(2));
 
-        if let SensorOutput::Text(ref s) = data_dht11 {
-            if let Err(e) = mqtt.send(s.as_bytes()) {
-                eprintln!("Error enviando DHT11 via MQTT: {:?}", e);
+        // -------------------------------------------------------
+        // DS18B20 — temperatura
+        // -------------------------------------------------------
+        match ds18b20.read() {
+            Ok(output) => {
+                match SensorParser::ds18b20(&output) {
+                    Ok(temp) => {
+                        println!("[DS18B20] Temp: {}°C", temp);
+
+                        let json = formatter.desde_valor("temperatura_ds18b20", temp);
+                        storage.save(output).unwrap();
+
+                        match mqtt.send(json.as_bytes()) {
+                            Ok(()) => println!("[DS18B20] Enviado: {}", json),
+                            Err(CommunicatorError::Disconnected) => {
+                                eprintln!("[DS18B20] Sin conexión. Reintentando pendientes...");
+                                let n = storage.flush_pending(&mut mqtt);
+                                println!("[DS18B20] Reenviados: {}", n);
+                            }
+                            Err(CommunicatorError::SendError) => {
+                                eprintln!("[DS18B20] Error de protocolo, descartado");
+                            }
+                        }
+                    }
+                    Err(e) => eprintln!("[DS18B20] Error al parsear: {:?}", e),
+                }
             }
+            Err(e) => eprintln!("[DS18B20] Error al leer: {:?}", e),
         }
 
-        if i < 3 {
-            println!("Esperando 8s antes de la siguiente lectura...");
-            thread::sleep(Duration::from_secs(8));
-        }
+        println!("Pendientes: {}  |  Esperando 10s...\n", storage.pending_count());
+        thread::sleep(Duration::from_secs(10));
     }
-
-    // Mostrar resultados almacenados
-    println!("Datos almacenados en memoria:");
-    for (i, entry) in storage.list().unwrap().iter().enumerate() {
-        println!("{}. {:?}", i + 1, entry);
-    }
-
-    println!("Lectura y envío finalizados.");
-
-    // Espera final para asegurar que los últimos mensajes MQTT se transmitan
-    thread::sleep(Duration::from_secs(1));
 }
